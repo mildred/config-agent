@@ -1,0 +1,6 @@
+--name=config-agent
+--version=0.1
+--architecture=all
+--after-install=install.sh
+--before-remove=uninstall.sh
+-s dir sbin=/usr lib=/usr

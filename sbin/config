@@ -1,0 +1,59 @@
+#!/bin/bash
+
+set -e
+
+basename="$(basename "$0")"
+bindir="$(cd "$(dirname "$0")"; echo "$PWD")"
+libdir="$(cd "$bindir/../lib/$basename"; echo "$PWD")"
+homedir="$(eval "echo ~$basename/")"
+command="$1"
+
+case "$command" in
+	add-user)
+		shift
+		mkdir -p "$homedir/.ssh"
+		key="$*"
+		echo "restrict,command=\"$bindir/$basename _sshcommand\" $key" >>"$homedir/.ssh/authorized_keys"
+	;;
+	del-user)
+		shift
+		user="$*"
+		fgrep -v "$user" "$homedir/.ssh/authorized_keys" >"$homedir/.ssh/authorized_keys+"
+		diff -u "$homedir/.ssh/authorized_keys" "$homedir/.ssh/authorized_keys+"
+		mv "$homedir/.ssh/authorized_keys+" "$homedir/.ssh/authorized_keys"
+	;;
+	_install)
+		if [ -d "$homedir" ]; then
+			echo "$basename: user already created" >&2
+			exit 1
+		fi
+		set -x
+		useradd -d "/var/lib/$basename" -g 0 -u 0 -m -N -o -r -s /bin/sh "$basename" </dev/null
+	;;
+	_uninstall)
+		set -x
+		userdel -f "$basename"
+	;;
+	help)
+		echo "$basename COMMAND ..."
+		echo "ssh $basename@$(hostname -f) COMMAND ..."
+		echo
+		echo "LIST OF COMMANDS"
+		echo
+		echo "    help"
+		echo "    add-user SSH PUBLIC KEY"
+		echo "    del-user SSH PUBLIC KEY"
+		for cmd in "$libdir/$basename-"*; do
+			name="${cmd##*/}"
+			name="${name#$basename-}"
+			short_usage="$(grep "^\S\S*\s*Short Usage: " $cmd | head -n 1 | sed 's/^.*Short Usage://')"
+			echo "    $name$short_usage"
+		done
+	;;
+	_sshcommand)
+		exec "$0" $SSH_ORIGINAL_COMMAND
+	;;
+	*)
+		exec "$libdir/$basename-$command" "$@"
+	;;
+esac

@@ -1,0 +1,11 @@
+/usr/lib/config
+===============
+
+This directory contains the executables with the prefix `config-` that can be
+executed locally by the `config` utility or remotely using the user `config`
+through an ssh connection. These scripts should be used to perform
+administrative tasks such as adding a virtual user, changing a password,
+performing a backup, upload public content...
+
+You can provide short usage for the help command by including a line comment in
+your script of the form `Short Usage: ARGS...`.
