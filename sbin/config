@@ -13,7 +13,7 @@ case "$command" in
 		shift
 		mkdir -p "$homedir/.ssh"
 		key="$*"
-		echo "restrict,command=\"$bindir/$basename _sshcommand\" $key" >>"$homedir/.ssh/authorized_keys"
+		echo "command=\"$bindir/$basename _sshcommand\" $key" >>"$homedir/.ssh/authorized_keys"
 	;;
 	del-user)
 		shift
